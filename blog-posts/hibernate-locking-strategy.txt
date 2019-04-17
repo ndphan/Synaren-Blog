@@ -1,0 +1,79 @@
+@formatter:type#header{Hibernate Locking Strategy}
+Locking is important for operations that are non-idempotent and require read transactions to occur in order of a write transaction. 
+
+Hibernate provides two locking strategies: @formatter:type#highlight{Optimistic and pessimistic locking}. 
+
+Optimistic locking is when versioning occurs using a table column or table row hash. This strategy does not lock the database record between reading and writing. Instead, the entity version is checked before committing the transaction to ensure operations occur on non-stale data. 
+
+Column versioning by using @Version annotation on an incremental data column such as a version or date column.
+
+Version column managed by Hibernate and cannot be modified
+@formatter:type#java{javax.persistence.Version}
+
+use @formatter:type#java{LockModeType.OPTIMISTIC_FORCE_INCREMENT} when loading the entity to force the version to update.
+@formatter:type#java{entityManager.find(NonIdempotent.class, primaryKey, LockModeType.OPTIMISTIC_FORCE_INCREMENT);}
+
+For version
+@formatter:type#java{@org.hibernate.annotations.Generated(GenerationTime.ALWAYS)}
+
+@formatter:type#java{@Entity(name = "StatefulTransaction")
+public class NonIdempotent {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private Long count;
+
+    @Version
+    private Date lastModifiedDate;
+}}
+
+For version-less
+for scenarios where the table does not have a natural version column then hibernate will check all the previous values in the update-where operation.
+
+Use @formatter:type#java{@org.hibernate.annotations.@OptimisticLocking(type = OptimisticLockType.ALL)} on the class to declare version-less optimistic locking. By default the optimistic lock type is version.
+
+There are a few types:
+- ALL: checks all previous columns have changed
+- DIRTY: only check previous columns that are dirty (that will change)
+- NONE: disable optimistic locking
+- VERSION (default)
+
+By default, any change to any column will trigger a version increment.
+Use @formatter:type#java{@OptimisticLock(excluded = true)} annotation to exclude a column from being versioned.
+This is useful for columns that do not require strong data consistency.
+
+To achieve this, hibernate adds a where clause with the previous version in the update statement. OptimisticLockException is thrown when the update fails.
+
+@formatter:type#sql{Update StatefulTransaction
+Set
+ count = 2,
+ lastModifiedDate = '2019-04-17 9:00:00.000'
+Where
+ id = 1
+ lastModifiedDate = '2019-04-17 8:59:59.000'}
+
+Pessimistic locking allows transactions to obtain exclusive locks to a database. 
+LockModeTypes:
+- READ, OPTIMISTIC: the version is checked
+- WRITE, OPTIMISTIC_FORCE_INCREMENT: entity version is incremented even if it's not changed
+- PESSIMISTIC_READ: the entity is locked using a shared lock - explicit or implicit lock 
+- PESSIMISTIC_WRITE: the entity is locked using an explicit lock
+- PESSIMISTIC_FORCE_INCREMENT: the entity is locked and the version is incremented
+- NONE: no lock
+
+use entity LockModeType to establish an Implicit lock on an entity
+@formatter:type#java{entityManager.find(NonIdempotent.class, 0L, LockModeType.PESSIMISTIC_WRITE);}
+OR
+@formatter:type#java{entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);}
+
+use buildLockRequest to establish an Explicit Lock
+@formatter:type#java{Session session = entityManager.unwrap(Session.class);
+session.buildLockRequest(LockOptions.NONE)
+    .setLockMode(LockMode.PESSIMISTIC_READ)
+    .setTimeOut(LockOptions.NO_WAIT)
+    .lock(person);}
+
+The explicit lock will lock the database rows during the start of the transaction
+The implicit lock will lock the database rows during the read operation

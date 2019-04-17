@@ -1,0 +1,147 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Synaren Blog setup
+Resources: 
+# -- Gateway
+  SynarenBlogApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+        Name: 'SynarenBlog'
+        EndpointConfiguration:
+          Types: 
+          - "REGIONAL"
+  SynarenBlogResource1:
+    DependsOn: SynarenBlogApi
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt SynarenBlogApi.RootResourceId
+      PathPart: 'synaren'
+      RestApiId: !Ref SynarenBlogApi
+  SynarenBlogResource2:
+    DependsOn: SynarenBlogResource1
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref SynarenBlogResource1
+      PathPart: 'api'
+      RestApiId: !Ref SynarenBlogApi
+  SynarenBlogResource3:
+    DependsOn: SynarenBlogResource2
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref SynarenBlogResource2
+      PathPart: 'blog'
+      RestApiId: !Ref SynarenBlogApi
+# -- Api Key
+  SynarenBlogApiKey: 
+    Type: AWS::ApiGateway::ApiKey
+    Properties: 
+      Name: SynarenBlogApiKey
+      Enabled: true
+      GenerateDistinctId: false
+  SynarenBlogApiUsagePlan:
+    DependsOn: SynarenBlogDeployment
+    Type: "AWS::ApiGateway::UsagePlan"
+    Properties:
+      ApiStages: 
+      - ApiId: !Ref SynarenBlogApi
+        Stage: v1
+      Quota:
+        Limit: 400000
+        Period: MONTH
+      Throttle:
+        BurstLimit: 100
+        RateLimit: 100
+      UsagePlanName: SynarenBlogApiUsagePlan
+  SynarenBlogApiUsagePlanKey:
+    DependsOn: SynarenBlogApiKey
+    Type: "AWS::ApiGateway::UsagePlanKey"
+    Properties:
+      KeyId: !Ref SynarenBlogApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref SynarenBlogApiUsagePlan
+# -- Api Key
+# -- CORS
+  SynarenBlogResource3OptionsMethod:
+    Type: AWS::ApiGateway::Method
+    DependsOn: SynarenBlogResource3
+    Properties:
+      AuthorizationType: NONE
+      ApiKeyRequired: false
+      RestApiId: !Ref SynarenBlogApi
+      ResourceId: !Ref SynarenBlogResource3
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+            method.response.header.Access-Control-Max-Age: "'600'"
+          ResponseTemplates:
+            application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: 'Empty'
+        ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Max-Age: false
+# -- CORS
+# -- SynarenBlogListArticlesFunction
+  SynarenBlogGetListArticlesPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn: SynarenBlogListArticlesFunction
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !GetAtt SynarenBlogListArticlesFunction.Arn
+      Principal: "apigateway.amazonaws.com"
+      SourceArn:  !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SynarenBlogApi}/*
+  SynarenBlogListArticlesFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code: '../code/SynarenBlogListArticlesFunction.js'
+      Description: 'Get all blog articles'
+      Runtime: nodejs8.10
+      Timeout: 180
+      MemorySize: 128
+      FunctionName: 'SynarenBlogListArticles'
+      Handler: SynarenBlogListArticlesFunction.handler
+      Role: arn:aws:iam::960300581623:role/service-role/SynarenBlogListArticles-role-u4t7fylt
+      Tags:
+        - Key: application
+          Value: SynarenBlog
+  SynarenBlogListArticlesMethod:
+    DependsOn: [SynarenBlogResource3, SynarenBlogListArticlesFunction, SynarenBlogGetListArticlesPermission]
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: true
+      AuthorizationType: None
+      HttpMethod: GET
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SynarenBlogListArticlesFunction.Arn}/invocations
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters: 
+            method.response.header.Content-Length: true
+            method.response.header.Content-Type: true
+            method.response.header.Connection: true
+      OperationName: SynarenBlogListArticlesMethod
+      ResourceId: !Ref SynarenBlogResource3
+      RestApiId: !Ref SynarenBlogApi
+# -- SynarenBlogListArticlesFunction
+# -- Deploy
+  SynarenBlogDeployment:
+    DependsOn: [SynarenBlogListArticlesMethod]
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref SynarenBlogApi
+      StageName: v1
+# -- Deploy
