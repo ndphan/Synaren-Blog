@@ -7,7 +7,7 @@ function mapBucketListData(data, prefix) {
     .filter(item => item.Key !== prefix 
       && item.Key !== prefix + "/" 
       && item.Size !== 0 
-      && item.endsWith('/') !== true
+      && item.Key.endsWith('/') !== true
     )
     .map(item => ({
       key: item.Key,
