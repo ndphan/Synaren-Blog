@@ -1,7 +1,7 @@
 const fs = require('fs');
 
-const productionFile = "./.env.production";
-const developFile = "./.env.production";
+const productionFile = ".env.production";
+const developFile = ".env.production";
 
 function randomBuildId() {
 	return 'xxxx-xxxx'.replace(/[xy]/g, char => {
