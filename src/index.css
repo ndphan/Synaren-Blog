@@ -1,0 +1,30 @@
+.banner {
+	position: relative;
+	z-index: 10;
+	max-width: 100%;
+	/* background: #252839; */
+	/* color: white; */
+	zoom: 1;
+	height: 48px;
+	line-height: 48px;
+	/* padding: 5px 0; */
+	padding-left: 10px;
+	/* box-shadow: #1d1d21 0 1px 3px; */
+	/* border-bottom: 1px solid #000; */
+	font-weight: 800;
+}
+
+.primary-colour {
+	color: #252839;
+	background: white;
+}
+
+.uk-tile-default {
+	color: #2d333b;
+	background: #fafaf8 !important;
+}
+
+span.highlight {
+	color: #252839;
+	font-weight: 600;	
+}
