@@ -191,19 +191,19 @@ function Articles({articles = [], onClick = () => {}}){
       <ArticleItem
         key={index}
       >
-        <Link to={articleRoute} onClick={onClick}>
+        <Link className="uk-link-reset" to={articleRoute} onClick={onClick}>
           <span style={{height:'24px',width:'18px',marginRight:'4px'}} className="uk-icon">
             <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="file-text"><rect fill="none" stroke="#000" width="13" height="17" x="3.5" y="1.5"></rect><line fill="none" stroke="#000" x1="6" x2="12" y1="12.5" y2="12.5"></line><line fill="none" stroke="#000" x1="6" x2="14" y1="8.5" y2="8.5"></line><line fill="none" stroke="#000" x1="6" x2="14" y1="6.5" y2="6.5"></line><line fill="none" stroke="#000" x1="6" x2="14" y1="10.5" y2="10.5"></line></svg>
           </span>
           <span style={{textTransform:'capitalize',fontSize:'16px',height:'24px',display:'inline-block',verticalAlign:'middle',fontWeight:'400'}}>
             {friendlyName}
           </span>
-          <span style={{marginTop:'-3px',marginLeft:'14px'}}>
+          <span style={{marginTop:'-3px',marginLeft:'6px'}}>
             {friendlyNamePart
               .slice(1, friendlyNamePart.length - 1)
               .map(
                 (tag, index) => 
-                  <span key={index} style={{padding:'6px',marginRight:'5px',textTransform:'capitalize'}} className="uk-badge">{tag}</span>
+                  <span key={index} style={{padding:'6px',marginRight:'5px',textTransform:'capitalize',background:'teal'}} className="uk-badge">{tag}</span>
               )
             }
           </span>
@@ -329,7 +329,7 @@ class BlogContainer extends PureComponent {
         <Boundary className="boundary"/>
         {this.state.isLoadingBlog ? <div uk-spinner="ratio: 0.5" style={triggerPosition}/> : <ArticleMenu style={triggerPosition} articles={articles} />}
         <hr style={{marginTop:0}}/>
-        {!this.state.article ? <ArticleList articles={articles}/> : undefined}
+        {!this.state.article && !this.state.isLoadingArticle ? <ArticleList articles={articles}/> : undefined}
         {this.state.isLoadingArticle ? <div uk-spinner="ratio: 0.5" style={{margin:0,paddingLeft: "20px"}}/> : <BlogArticle metaData={this.state.articleMetaData} article={this.state.article} />}
         <br/>
         <br/>

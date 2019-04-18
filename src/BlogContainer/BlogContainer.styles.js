@@ -22,7 +22,7 @@ export const NavArticle = styled.li`
 `
 
 export const ArticleItem = styled.li`
-	margin-left: 10px;
+	margin-left: 8px;
 `
 
 export const Boundary = styled.div`
