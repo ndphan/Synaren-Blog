@@ -31,9 +31,9 @@ export function formatter(text) {
 			}
 	}
 	return (
-		<ul uk-accordion="true" className="uk-margin-small-bottom">
-				<li>
-						<a className="uk-accordion-title uk-margin-small-top">{header}</a>
+		<ul uk-accordion="collapsible: false" className="uk-margin-small-bottom">
+				<li className="uk-open">
+						<h4 className="uk-margin-remove">{header}</h4>
 						<div className="uk-accordion-content uk-margin-remove-top">
 							{textHtml}
 						</div>

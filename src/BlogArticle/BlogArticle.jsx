@@ -21,8 +21,11 @@ class BlogArticle extends Component {
 }
 
 BlogArticle.propTypes = {
-  article: PropTypes.string
+  article: PropTypes.string,
+  collapsible: PropTypes.bool
 };
-BlogArticle.defaultProps = {};
+BlogArticle.defaultProps = {
+  collapsible: true
+};
 
 export default BlogArticle;

@@ -7,11 +7,15 @@ import {
   NavIcon,
   NavDirectory,
   NavArticle,
-  ArticleItem
+  ArticleItem,
+  Boundary
 } from "./BlogContainer.styles";
 import { Config } from "./service.config";
 import { Link } from "react-router-dom";
 import UIKit from "uikit";
+import ArticleMenu from "../ArticleMenu/ArticleMenu";
+
+const triggerPosition = {right:'20px',top:'18px',position:'absolute',zIndex:'1000'}
 
 function getArticle(article) {
   return send(
@@ -170,7 +174,7 @@ function ArticleNav({ menu = [], articles = [] }) {
   );
 }
 
-function Articles({articles = []}){
+function Articles({articles = [], onClick = () => {}}){
   return articles.map((item, index) => {
     const friendlyNamePart = item.key.split("/");
     const friendlyName = friendlyNamePart[friendlyNamePart.length - 1]
@@ -187,7 +191,7 @@ function Articles({articles = []}){
       <ArticleItem
         key={index}
       >
-        <Link to={articleRoute}>
+        <Link to={articleRoute} onClick={onClick}>
           <span style={{height:'24px',width:'18px',marginRight:'4px'}} className="uk-icon">
             <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="file-text"><rect fill="none" stroke="#000" width="13" height="17" x="3.5" y="1.5"></rect><line fill="none" stroke="#000" x1="6" x2="12" y1="12.5" y2="12.5"></line><line fill="none" stroke="#000" x1="6" x2="14" y1="8.5" y2="8.5"></line><line fill="none" stroke="#000" x1="6" x2="14" y1="6.5" y2="6.5"></line><line fill="none" stroke="#000" x1="6" x2="14" y1="10.5" y2="10.5"></line></svg>
           </span>
@@ -209,10 +213,46 @@ function Articles({articles = []}){
   })
 }
 
+function ArticleListOffCanvas({articles = []}) {
+  const [canvasRef] = useState(React.createRef());
+  return (
+    <React.Fragment>
+      <div className="uk-link uk-icon" style={triggerPosition} uk-toggle="target: #nav-off-canvas">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+          data-svg="table"
+        >
+          <rect x="1" y="3" width="18" height="1" />
+          <rect x="1" y="7" width="18" height="1" />
+          <rect x="1" y="11" width="18" height="1" />
+          <rect x="1" y="15" width="18" height="1" />
+        </svg>
+        <span style={{paddingLeft:'10px',height:'20px',verticalAlign:'middle',fontWeight:'600'}}>
+         Articles
+        </span>
+      </div>
+      <div
+        ref={canvasRef}
+        id="nav-off-canvas"
+        uk-offcanvas="mode: push;overlay: true;"
+      >
+        <div className="uk-offcanvas-bar">
+          <ul className="uk-list">
+            <Articles onClick={_ => UIKit.offcanvas(canvasRef.current).hide()} articles={articles} />
+          </ul>
+        </div>
+      </div>
+    </React.Fragment>
+  );
+}
+
 function ArticleList({articles = []}) {
   return (
     <ul uk-accordion="true" className="uk-margin-small-bottom">
-      <li>
+      <li className="uk-open">
         <a className="uk-accordion-title">Articles</a>
         <div className="uk-accordion-content" style={{marginTop:'15px'}}>
           <ul className="uk-list uk-list-divider">
@@ -232,6 +272,7 @@ class BlogContainer extends PureComponent {
       if (this.articleRoute.withProps(this.props).isArticle()) {
         this.setArticleFromRoute();
       } else {
+        this.setState({article: undefined});
         this.loadArticles();
       }
     }
@@ -280,9 +321,10 @@ class BlogContainer extends PureComponent {
     const { articles } = this.state;
     return (
       <Container>
-        <hr/>
-        {this.state.isLoadingBlog ? <div uk-spinner="ratio: 0.5" style={{margin:0,paddingLeft: "20px"}}/> : <ArticleList articles={articles} />}
-        <hr/>
+        <Boundary className="boundary"/>
+        {this.state.isLoadingBlog ? <div uk-spinner="ratio: 0.5" style={triggerPosition}/> : <ArticleMenu style={triggerPosition} articles={articles} />}
+        <hr style={{marginTop:0}}/>
+        {!this.state.article ? <ArticleList articles={articles}/> : undefined}
         {this.state.isLoadingArticle ? <div uk-spinner="ratio: 0.5" style={{margin:0,paddingLeft: "20px"}}/> : <BlogArticle article={this.state.article} />}
         <br/>
         <br/>

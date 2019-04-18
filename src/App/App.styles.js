@@ -22,5 +22,5 @@ export const FooterVersion = styled.div`
 
 export const ContentContainer = styled.div`
   max-width: 800px;
-  padding-left: 10px;
+  padding: 0 10px;
 `
