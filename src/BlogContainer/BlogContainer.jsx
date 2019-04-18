@@ -310,10 +310,15 @@ class BlogContainer extends PureComponent {
     .then(_ => this.setArticleFromRoute())
     .catch(_ => this.setState({isLoadingBlog: false}));
   }
-  setArticle = article => {
+  setArticle = articleKey => {
     this.setState({isLoadingArticle: true})
-    getArticle(article).then(article => {
-      this.setState({ article: article, isLoadingArticle: false });
+    getArticle(articleKey).then(article => {
+      const articleMetaDatas = this.state.articles.filter(article => article.key === articleKey.key);
+      let metaData;
+      if(articleMetaDatas && articleMetaDatas.length === 1){
+        metaData = articleMetaDatas[0]
+      }
+      this.setState({ article: article, isLoadingArticle: false , articleMetaData: metaData});
       this.articleRoute.withProps(this.props).updateArticleRoute(article);
     }).catch(_ => this.setState({isLoadingArticle: false}));
   };
@@ -325,7 +330,7 @@ class BlogContainer extends PureComponent {
         {this.state.isLoadingBlog ? <div uk-spinner="ratio: 0.5" style={triggerPosition}/> : <ArticleMenu style={triggerPosition} articles={articles} />}
         <hr style={{marginTop:0}}/>
         {!this.state.article ? <ArticleList articles={articles}/> : undefined}
-        {this.state.isLoadingArticle ? <div uk-spinner="ratio: 0.5" style={{margin:0,paddingLeft: "20px"}}/> : <BlogArticle article={this.state.article} />}
+        {this.state.isLoadingArticle ? <div uk-spinner="ratio: 0.5" style={{margin:0,paddingLeft: "20px"}}/> : <BlogArticle metaData={this.state.articleMetaData} article={this.state.article} />}
         <br/>
         <br/>
       </Container>

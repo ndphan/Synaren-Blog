@@ -14,7 +14,7 @@ class BlogArticle extends Component {
   render() {
     return (
       <div>
-        {this.props.article ? formatter(this.props.article) : undefined}
+        {this.props.article ? formatter(this.props.article, this.props.metaData) : undefined}
       </div>
     );
   }
@@ -22,7 +22,8 @@ class BlogArticle extends Component {
 
 BlogArticle.propTypes = {
   article: PropTypes.string,
-  collapsible: PropTypes.bool
+  collapsible: PropTypes.bool,
+  metaData: PropTypes.object
 };
 BlogArticle.defaultProps = {
   collapsible: true

@@ -1,5 +1,7 @@
 import React from 'react';
-export function formatter(text) {
+import moment from 'moment';
+
+export function formatter(text, metaData) {
 	const textSplit = text.split('@formatter:type');
 	let isFirst = true;
 	let textHtml = [];
@@ -30,10 +32,13 @@ export function formatter(text) {
 					codeComponent = [];
 			}
 	}
+	const dateMoment = moment(metaData && metaData.lastModified);
+	const date = dateMoment.isValid() ? dateMoment.format('YYYY-MM-DD h:mm A') : undefined;
 	return (
 		<ul uk-accordion="collapsible: false" className="uk-margin-small-bottom">
 				<li className="uk-open">
 						<h4 className="uk-margin-remove">{header}</h4>
+						{date ? <div style={{textTransform:'lowercase'}}>{date}</div> : undefined}
 						<div className="uk-accordion-content uk-margin-remove-top">
 							{textHtml}
 						</div>
