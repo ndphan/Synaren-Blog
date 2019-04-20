@@ -1,51 +1,42 @@
 @formatter:type#header{Hibernate Locking Strategy}
-Locking is important for operations that are non-idempotent and require read transactions to occur in order of a write transaction. 
+Locking is important for operations that are non-idempotent and require correct ordering of reading and write operations. By locking the record from reading transactions this ensures that applications operate on data that is valid. This is particularly important when working with concurrent transactions that occur for a long time or across different transaction boundaries that can have multiple reads and write operations concurrently.
 
 Hibernate provides two locking strategies: @formatter:type#highlight{Optimistic and pessimistic locking}. 
 
-Optimistic locking is when versioning occurs using a table column or table row hash. This strategy does not lock the database record between reading and writing. Instead, the entity version is checked before committing the transaction to ensure operations occur on non-stale data. 
+Optimistic locking is a locking type that will avoid locking the database. This is achieved by checking a versioning column or row values between the previous and current database values. 
 
-Column versioning by using @Version annotation on an incremental data column such as a version or date column.
-
-Version column managed by Hibernate and cannot be modified
-@formatter:type#java{javax.persistence.Version}
-
-use @formatter:type#java{LockModeType.OPTIMISTIC_FORCE_INCREMENT} when loading the entity to force the version to update.
+@formatter:type#highlight{Column Versioning}
+Column versioning can be achieved by using a @formatter:type#java{javax.persistence.@Version} annotation on an incremental data column such as a version number or date column on the entity class.
+The version columns are managed by Hibernate and cannot be modified by default.
+To modify the version, use @formatter:type#java{LockModeType.OPTIMISTIC_FORCE_INCREMENT} when loading the entity to force the version to update.
 @formatter:type#java{entityManager.find(NonIdempotent.class, primaryKey, LockModeType.OPTIMISTIC_FORCE_INCREMENT);}
 
-For version
-@formatter:type#java{@org.hibernate.annotations.Generated(GenerationTime.ALWAYS)}
+By default, any changes to a column will trigger a version increment - to exclude a column from triggering a version increment, use @formatter:type#java{@OptimisticLock(excluded = true)} annotation on the column field. This is useful for columns that do not require strong data consistency.
 
 @formatter:type#java{@Entity(name = "StatefulTransaction")
 public class NonIdempotent {
-
     @Id
     @GeneratedValue
     private Long id;
 
     private Long count;
 
+    @Generated(GenerationTime.ALWAYS)
     @Version
     private Date lastModifiedDate;
 }}
 
-For version-less
-for scenarios where the table does not have a natural version column then hibernate will check all the previous values in the update-where operation.
+@formatter:type#highlight{Alternative to Column Versioning}
+For scenarios where the table does not have a natural version column then hibernate will check all the previous values in the update-where operation.
+By default the optimistic lock type is version, to achieve versionless locking use @formatter:type#java{@org.hibernate.annotations.@OptimisticLocking(type = OptimisticLockType.ALL)} annotation on the class. 
 
-Use @formatter:type#java{@org.hibernate.annotations.@OptimisticLocking(type = OptimisticLockType.ALL)} on the class to declare version-less optimistic locking. By default the optimistic lock type is version.
-
-There are a few types:
+Types of optimistic locks:
 - ALL: checks all previous columns have changed
 - DIRTY: only check previous columns that are dirty (that will change)
 - NONE: disable optimistic locking
 - VERSION (default)
 
-By default, any change to any column will trigger a version increment.
-Use @formatter:type#java{@OptimisticLock(excluded = true)} annotation to exclude a column from being versioned.
-This is useful for columns that do not require strong data consistency.
-
-To achieve this, hibernate adds a where clause with the previous version in the update statement. OptimisticLockException is thrown when the update fails.
-
+To achieve optimistic locking, hibernate adds a where clause with the previous version in the update statement. If the values do not match, the update fails and @formatter:type#java{OptimisticLockException} is thrown.
 @formatter:type#sql{Update StatefulTransaction
 Set
  count = 2,
@@ -54,7 +45,7 @@ Where
  id = 1
  lastModifiedDate = '2019-04-17 8:59:59.000'}
 
-Pessimistic locking allows transactions to obtain exclusive locks to a database. 
+Pessimistic locking allows transactions to obtain exclusive locks to a database, therefore this locking strategy is managed by the database. It is important to consider the different behaviours between database servers as the results can vary due to different locking implementations.
 LockModeTypes:
 - READ, OPTIMISTIC: the version is checked
 - WRITE, OPTIMISTIC_FORCE_INCREMENT: entity version is incremented even if it's not changed
@@ -63,17 +54,18 @@ LockModeTypes:
 - PESSIMISTIC_FORCE_INCREMENT: the entity is locked and the version is incremented
 - NONE: no lock
 
-use entity LockModeType to establish an Implicit lock on an entity
-@formatter:type#java{entityManager.find(NonIdempotent.class, 0L, LockModeType.PESSIMISTIC_WRITE);}
-OR
-@formatter:type#java{entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);}
+An explicit lock will lock the database rows during the start of the transaction.
+An implicit lock will lock the database rows during the read operation which usually occurs when the transaction is being committed.
 
-use buildLockRequest to establish an Explicit Lock
+To establish an Implicit Lock as follows:
+@formatter:type#java{entityManager.find(NonIdempotent.class, 0L, LockModeType.PESSIMISTIC_READ);}
+OR
+@formatter:type#java{entityManager.lock(entity, LockModeType.PESSIMISTIC_READ);}
+
+To establish an Explicit Lock use buildLockRequest:
 @formatter:type#java{Session session = entityManager.unwrap(Session.class);
 session.buildLockRequest(LockOptions.NONE)
-    .setLockMode(LockMode.PESSIMISTIC_READ)
+    .setLockMode(LockMode.PESSIMISTIC_WRITE)
     .setTimeOut(LockOptions.NO_WAIT)
     .lock(person);}
 
-The explicit lock will lock the database rows during the start of the transaction
-The implicit lock will lock the database rows during the read operation

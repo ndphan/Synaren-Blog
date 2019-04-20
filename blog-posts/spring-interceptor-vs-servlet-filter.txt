@@ -40,7 +40,7 @@ Declare the ServletFilter in @formatter:type#java{Filter[] getServletFilters()} 
 One common use case for Servlet filters is to intercept requests before the Spring security authentication processing mechanism.
 As Spring security maintains its own filter chain, therefore filters are required to intercept requests before being processed by the authentication mechanism.
 
-In the WebSecurityConfigurerAdapter, the filter chain can be configured as follows.
+In the WebSecurityConfigurerAdapter, the filter chain can be configured as follows:
 
 @formatter:type#java{http.addFilterBefore(beforeFilter, UsernamePasswordAuthenticationFilter.class)
              .addFilterAfter(afterFilter, UsernamePasswordAuthenticationFilter.class)}
@@ -51,7 +51,7 @@ This will add the filters before and after the default authentication mechanism 
 Spring interceptors are similar to Servlet filters but operate in the spring context. This is useful for pre and post processing behaviour before or after another existing interceptor
 or one that requires spring @autowiring (although this can be achieved in filters using @formatter:type#java{org.springframework.web.filter.DelegatingFilterProxy} discussed later). 
 The interceptor allows for blocking execution of subsequential chains and handling pre, post, and complete actions. 
-This allow for easier composition of logic that requires a cleanup / finally pattern.
+This allow for easier composition of logic that requires a cleanup / finally pattern compared to Servlet filters.
 
 @formatter:type#java{public class SpringInterceptor implements HandlerInterceptor {
     @Override
@@ -92,24 +92,26 @@ To create a filter with access to the spring context one can implement @formatte
 The proxy will call a Spring-managed filter with the same bean name which implements @formatter:type#java{javax.servlet.Filter}.
 
 @formatter:type#java{public class SpringManagedFilterProxy extends DelegatingFilterProxy {
-	public DecryptWebFilter(){
+	public SpringManagedFilterProxy(){
 		// name of the bean to proxy to
-		super("springManagedFilterInterceptor");
+		super("springManagedFilter");
 	}
 }}
 
 @formatter:type#image{https://synaren-app.com/images/spring-filter-interceptor-flow.png}
 
 @formatter:type#subheader{Conclusion}
-In general, the best practice is to implement interceptors for application-specific business logic while leaving 
-filters as generic logic that does not change between applications.
+The Servlet filter and Spring interceptor allow applications to decouple common logic from the application logic.
+In general, the best practice is to implement interceptors for application-specific logic and filters for generic web tasks that can be reused.
 
-Some examples:
+Examples (but can vary based on requirements):
+@formatter:type#highlight{Filters:}
 - gzip Filter
-- JWT Filter
+- JWT/Authentication Filter
 - Multipart Filter
 - Decryption Filter
 - CORS Filter
+@formatter:type#highlight{Interceptors:}
 - Event trigger Interceptor
 - Application logging Interceptor
 - Authorisation Interceptor
