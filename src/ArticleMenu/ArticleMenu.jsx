@@ -2,6 +2,12 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { ArticleItem, ArticleTrigger, ArticleLink, ArticleText } from './ArticleMenu.styles.js';
 
+const blacklist = { 'vs': true }
+
+function capitaliseBlacklist(text){
+  return text.split(' ').map(word => (word.length > 0 && !blacklist[word]) ? word[0].toUpperCase() + word.substring(1).toLowerCase() : word).join(' ');
+}
+
 function Articles({articles = [], onClick = () => {}}){
   return articles.map((item, index) => {
     const friendlyNamePart = item.key.split("/");
@@ -24,7 +30,7 @@ function Articles({articles = [], onClick = () => {}}){
             <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="file-text"><rect fill="none" stroke="#000" width="13" height="17" x="3.5" y="1.5"></rect><line fill="none" stroke="#000" x1="6" x2="12" y1="12.5" y2="12.5"></line><line fill="none" stroke="#000" x1="6" x2="14" y1="8.5" y2="8.5"></line><line fill="none" stroke="#000" x1="6" x2="14" y1="6.5" y2="6.5"></line><line fill="none" stroke="#000" x1="6" x2="14" y1="10.5" y2="10.5"></line></svg>
           </span>
           <ArticleText>
-            {friendlyName}
+            {capitaliseBlacklist(friendlyName)}
           </ArticleText>
         </ArticleLink>
       </ArticleItem>

@@ -1,10 +1,12 @@
 import React from 'react';
 import { Banner } from './SynarenBanner.styles';
-
+import { Link } from 'react-router-dom'
 const SynarenBanner = _ => (
   <Banner className="banner primary-color">
     <div style={{margin:"auto",maxWidth:"800px"}}>
-      <span>Synaren Blog</span>
+      <Link to="/blog/" className="uk-link-heading uk-link-reset">
+        Synaren Blog
+      </Link>
     </div>
   </Banner>
 )

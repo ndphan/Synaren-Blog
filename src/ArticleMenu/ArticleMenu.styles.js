@@ -18,7 +18,6 @@ export const ArticleTrigger = styled.div`
 `
 
 export const ArticleText = styled.span`
-	text-transform: capitalize;
 	font-size: 16px;
 	line-height: 18px;
 	display: inline;

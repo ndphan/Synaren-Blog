@@ -27,6 +27,12 @@ function getArticle(article) {
   );
 }
 
+const blacklist = { 'vs': true }
+
+function capitaliseBlacklist(text){
+  return text.split(' ').map(word => (word.length > 0 && !blacklist[word]) ? word[0].toUpperCase() + word.substring(1).toLowerCase() : word).join(' ');
+}
+
 class ArticleRoute {
   ARTICLE_SUFFIX = "-article";
   BLOG_PREFIX = "blog";
@@ -195,8 +201,8 @@ function Articles({articles = [], onClick = () => {}}){
           <span style={{height:'24px',width:'18px',marginRight:'4px'}} className="uk-icon">
             <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="file-text"><rect fill="none" stroke="#000" width="13" height="17" x="3.5" y="1.5"></rect><line fill="none" stroke="#000" x1="6" x2="12" y1="12.5" y2="12.5"></line><line fill="none" stroke="#000" x1="6" x2="14" y1="8.5" y2="8.5"></line><line fill="none" stroke="#000" x1="6" x2="14" y1="6.5" y2="6.5"></line><line fill="none" stroke="#000" x1="6" x2="14" y1="10.5" y2="10.5"></line></svg>
           </span>
-          <span style={{textTransform:'capitalize',fontSize:'16px',height:'24px',display:'inline-block',verticalAlign:'middle',fontWeight:'400'}}>
-            {friendlyName}
+          <span style={{fontSize:'16px',height:'24px',display:'inline-block',verticalAlign:'middle',fontWeight:'400'}}>
+            {capitaliseBlacklist(friendlyName)}
           </span>
           <span style={{marginTop:'-3px',marginLeft:'6px'}}>
             {friendlyNamePart
