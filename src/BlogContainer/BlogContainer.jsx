@@ -1,6 +1,6 @@
 import React, { PureComponent, useState } from "react";
 import PropTypes from "prop-types";
-import { send } from "../Sevices/common";
+import { send } from "../Services/common";
 import BlogArticle from "../BlogArticle";
 import {
   Container,

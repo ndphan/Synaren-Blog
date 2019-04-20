@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { formatter } from '../Sevices/document-formatter';
+import { formatter } from '../Services/document-formatter';
 
 class BlogArticle extends Component {
   componentDidMount(){

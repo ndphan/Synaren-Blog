@@ -38,7 +38,7 @@ export function formatter(text, metaData) {
 		<ul uk-accordion="collapsible: false" className="uk-margin-small-bottom">
 				<li className="uk-open">
 						<h4 className="uk-margin-remove">{header}</h4>
-						{date ? <div style={{textTransform:'lowercase'}}>{date}</div> : undefined}
+						{date ? <small style={{textTransform:'lowercase'}}>{date}</small> : undefined}
 						<div className="uk-accordion-content uk-margin-remove-top">
 							{textHtml}
 						</div>
@@ -50,6 +50,8 @@ export function formatter(text, metaData) {
 function formatTag(index, codeType, codePart){
 	if (codeType === 'header') {
 		return <h3 style={{margin:0}} className='uk-heading-line' key={`${index}.header`}>{codePart}</h3>
+	} else	if (codeType === 'subheader') {
+		return <h4 style={{margin:0}} className='uk-heading-line' key={`${index}.header`}>{codePart}</h4>
 	} else if(codeType === 'highlight'){
 		return <span className={`${codeType}`} key={`${index}.code`}>{codePart}</span>
 	} else {
