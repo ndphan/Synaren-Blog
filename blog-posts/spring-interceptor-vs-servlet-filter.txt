@@ -1,81 +1,81 @@
 @formatter:type#header{Spring interceptor vs Servlet filter}
 The Servlet filter and Spring interceptor allow applications to intercept web requests before and after the application controller.
-This is useful when you need to decouple web tasks from the application logic such as gzip compression, authentication and logging requests.
+This is useful when you need to decouple web tasks from the application logic such as gzip compression, authentication, and logging requests.
 
 @formatter:type#subheader{Servlet filters}
-Servlet filters operate on the server level and is declared in the web.xml, therefore does not depend on Spring.
+Servlet filters operate on the server level and are declared in the web.xml, therefore does not depend on Spring.
 However for Spring applications with no web.xml, Servlet filters can be declared as follows:
 
 @formatter:type#java{public class WebAppInitialiser extends AbstractAnnotationConfigDispatcherServletInitializer {
-	@Override
-	protected Class<?>[] getRootConfigClasses() {
-		// spring root configuration
-		return new Class<?>[] {SecurityConfiguration.class};
-	}
-	@Override
-	protected Class<?>[] getServletConfigClasses() {
-		// root shared configuration
-		return new Class<?>[] {AppConfig.class};
-	}
-	@Override
-	protected Filter[] getServletFilters() {
-		// declare custom servlet filters
-		return new Filter[] {new ServletFilter()};
-	}
+    @Override
+    protected Class<?>[] getRootConfigClasses() {
+        // spring root configuration
+        return new Class<?>[] {SecurityConfiguration.class};
+    }
+    @Override
+    protected Class<?>[] getServletConfigClasses() {
+        // root shared configuration
+        return new Class<?>[] {AppConfig.class};
+    }
+    @Override
+    protected Filter[] getServletFilters() {
+        // declare custom servlet filters
+        return new Filter[] {new ServletFilter()};
+    }
 }}
 
-Where we declare the ServletFilter in @formatter:type#java{Filter[] getServletFilters()} which must implement @formatter:type#java{javax.servlet.Filter}
+Declare the ServletFilter in @formatter:type#java{Filter[] getServletFilters()} which implements @formatter:type#java{javax.servlet.Filter}
 
 @formatter:type#java{public class ServletFilter implements Filter {
-	@Override
-	public void doFilter(ServletRequest request, 
-			ServletResponse response, FilterChain chain)
-			throws IOException, ServletException {
-		// pre-processing logic
-		chain.doFilter(request, response);
-		// post-processing logic
-	}
+    @Override
+    public void doFilter(ServletRequest request, 
+            ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+        // pre-processing logic
+        chain.doFilter(request, response);
+        // post-processing logic
+    }
 }}
 
 One common use case for Servlet filters is to intercept requests before the Spring security authentication processing mechanism.
 As Spring security maintains its own filter chain, therefore filters are required to intercept requests before being processed by the authentication mechanism.
 
-In the WebSecurityConfigurerAdapter, the filterchain can be configured as follows.
+In the WebSecurityConfigurerAdapter, the filter chain can be configured as follows.
 
 @formatter:type#java{http.addFilterBefore(beforeFilter, UsernamePasswordAuthenticationFilter.class)
-			 .addFilterAfter(afterFilter, UsernamePasswordAuthenticationFilter.class)}
+             .addFilterAfter(afterFilter, UsernamePasswordAuthenticationFilter.class)}
 
 This will add the filters before and after the default authentication mechanism @formatter:type#java{UsernamePasswordAuthenticationFilter}.
 
 @formatter:type#subheader{Spring Interceptors}
 Spring interceptors are similar to Servlet filters but operate in the spring context. This is useful for pre and post processing behaviour before or after another existing interceptor
 or one that requires spring @autowiring (although this can be achieved in filters using @formatter:type#java{org.springframework.web.filter.DelegatingFilterProxy} discussed later). 
-The interceptor allows for blocking execution of subsequential chains and handling pre, post and complete actions. 
-The pre, post and complete action allows for easier composition of logic that requires a cleanup pattern.
+The interceptor allows for blocking execution of subsequential chains and handling pre, post, and complete actions. 
+This allow for easier composition of logic that requires a cleanup / finally pattern.
 
 @formatter:type#java{public class SpringInterceptor implements HandlerInterceptor {
-	@Override
-	public boolean preHandle(HttpServletRequest request, 
-			HttpServletResponse response, Object handler)
-			throws Exception {
-		// pre-handle logic
-		// return true if the execution should proceed
-		return true;
-	}
-	@Override
-	public void postHandle(HttpServletRequest request, 
-			HttpServletResponse response, Object handler,
-			ModelAndView modelAndView) throws Exception {
-		// post-handle logic
-		// this is only called after all prehandle tasks are complete
-	}
-	@Override
-	public void afterCompletion(HttpServletRequest request, 
-			HttpServletResponse response, Object handler, Exception ex)
-			throws Exception {
-			// complete / clean up logic
-			// this is always called
-	}
+    @Override
+    public boolean preHandle(HttpServletRequest request, 
+            HttpServletResponse response, Object handler)
+            throws Exception {
+        // pre-handle logic
+        // return true if the execution should proceed
+        return true;
+    }
+    @Override
+    public void postHandle(HttpServletRequest request, 
+            HttpServletResponse response, Object handler,
+            ModelAndView modelAndView) throws Exception {
+        // post-handle logic
+        // this is only called after all prehandle tasks are complete
+    }
+    @Override
+    public void afterCompletion(HttpServletRequest request, 
+            HttpServletResponse response, Object handler, Exception ex)
+            throws Exception {
+            // complete / clean up logic
+            // this is always called
+    }
 }}
 
 Common usages for interceptors and filters are:
@@ -89,10 +89,19 @@ Common usages for interceptors and filters are:
 
 @formatter:type#subheader{Spring DelegatingFilterProxy}
 To create a filter with access to the spring context one can implement @formatter:type#java{org.springframework.web.filter.DelegatingFilterProxy} to proxy the Servlet filter to a Spring managed filter. 
-The proxy will call a Spring managed filter with the same bean name which implements @formatter:type#java{javax.servlet.Filter}.
+The proxy will call a Spring-managed filter with the same bean name which implements @formatter:type#java{javax.servlet.Filter}.
+
+@formatter:type#java{public class SpringManagedFilterProxy extends DelegatingFilterProxy {
+	public DecryptWebFilter(){
+		// name of the bean to proxy to
+		super("springManagedFilterInterceptor");
+	}
+}}
+
+@formatter:type#image{https://synaren-app.com/images/spring-filter-interceptor-flow.png}
 
 @formatter:type#subheader{Conclusion}
-In general, the best practice is to implement interceptors for application specific business logic while leaving 
+In general, the best practice is to implement interceptors for application-specific business logic while leaving 
 filters as generic logic that does not change between applications.
 
 Some examples:

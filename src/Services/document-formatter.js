@@ -21,7 +21,7 @@ export function formatter(text, metaData) {
 					const codeTypeIndex = split.search(/\{/g);
 					const codeType = split.slice(1, codeTypeIndex);
 					const codePart = split.slice(1 + codeTypeIndex, codeIndex);
-					const formatted = formatTag(index, codeType, codePart);
+					const formatted = formatTag(index, codeType, codePart, metaData.key);
 					if(codeType === 'header'){
 						header = codePart;
 					} else {
@@ -47,9 +47,22 @@ export function formatter(text, metaData) {
 	);
 }
 
-function formatTag(index, codeType, codePart){
+function formatTag(index, codeType, codePart, key){
 	if (codeType === 'header') {
 		return <h3 style={{margin:0}} className='uk-heading-line' key={`${index}.header`}>{codePart}</h3>
+	} else if(codeType === 'image'){
+		let imageUrl = codePart;
+		let altName;
+		if(codePart[0] === '/'){
+			// relative path
+			const keyParts = key.split('/')
+			imageUrl = keyParts.slice(0, keyParts.length - 1).join('/') + codePart;
+			altName = codePart.split('.').slice(0, 1).join('').substring(1).replace(/-/g, ' ');
+		} else {
+			const keyParts = key.split('/');
+			altName = keyParts.slice(keyParts.length - 1).join('').split('.').slice(0, 1).join('').replace(/-/g, ' ');
+		}
+		return <img key={`${index}.image`} src={imageUrl} alt={altName}></img>
 	} else	if (codeType === 'subheader') {
 		return <h4 style={{margin:0}} className='uk-heading-line' key={`${index}.header`}>{codePart}</h4>
 	} else if(codeType === 'highlight'){
