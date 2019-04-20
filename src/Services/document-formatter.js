@@ -59,8 +59,8 @@ function formatTag(index, codeType, codePart, key){
 			imageUrl = keyParts.slice(0, keyParts.length - 1).join('/') + codePart;
 			altName = codePart.split('.').slice(0, 1).join('').substring(1).replace(/-/g, ' ');
 		} else {
-			const keyParts = key.split('/');
-			altName = keyParts.slice(keyParts.length - 1).join('').split('.').slice(0, 1).join('').replace(/-/g, ' ');
+			const codeParts = codePart.split('/');
+			altName = codeParts.slice(codeParts.length - 1).join('').split('.').slice(0, 1).join('').replace(/-/g, ' ');
 		}
 		return <img key={`${index}.image`} src={imageUrl} alt={altName}></img>
 	} else	if (codeType === 'subheader') {
