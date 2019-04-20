@@ -39,7 +39,7 @@ export function formatter(text, metaData) {
 				<li className="uk-open">
 						<h4 className="uk-margin-remove">{header}</h4>
 						{date ? <small style={{textTransform:'lowercase'}}>{date}</small> : undefined}
-						<div className="uk-accordion-content uk-margin-remove-top">
+						<div className="uk-accordion-content uk-margin-remove-top" style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
 							{textHtml}
 						</div>
 				</li>
