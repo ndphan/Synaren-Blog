@@ -93,6 +93,50 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
             method.response.header.Access-Control-Max-Age: false
 # -- CORS
+# -- IAM Service Role
+  SynarenBlogServiceRole:
+    Type: AWS::IAM::Role
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "lambda.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Path: '/'
+      Policies: 
+        -
+          PolicyName: "SynarenBlogFunctionLog"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action: logs:CreateLogGroup
+              Resource: !Sub arn:aws:logs:*:${AWS::AccountId}:*
+            - Effect: Allow
+              Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              Resource:
+              - !Sub arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/lambda/*
+        -
+          PolicyName: "SynarenBlogS3"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - s3:Get*
+              - s3:List*
+              Resource: 
+              - "arn:aws:s3:::synaren-app.com"
+              - "arn:aws:s3:::synaren-app.com/*"
+      RoleName: 'SynarenBlogServiceRole'
+# -- IAM Service Role
 # -- SynarenBlogListArticlesFunction
   SynarenBlogGetListArticlesPermission:
     Type: AWS::Lambda::Permission
@@ -112,7 +156,7 @@ Resources:
       MemorySize: 128
       FunctionName: 'SynarenBlogListArticles'
       Handler: SynarenBlogListArticlesFunction.handler
-      Role: arn:aws:iam::960300581623:role/service-role/SynarenBlogListArticles-role-u4t7fylt
+      Role: !GetAtt SynarenBlogServiceRole.Arn
       Tags:
         - Key: application
           Value: SynarenBlog

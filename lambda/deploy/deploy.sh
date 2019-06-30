@@ -4,4 +4,5 @@ aws cloudformation package \
   --s3-bucket synaren-cli && \
 aws cloudformation deploy \
   --template-file package.yaml \
-  --stack-name SynarenBlog
+  --stack-name SynarenBlog \
+  --capabilities CAPABILITY_NAMED_IAM
