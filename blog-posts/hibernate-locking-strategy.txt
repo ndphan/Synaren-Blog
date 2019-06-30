@@ -45,7 +45,7 @@ Where
  id = 1
  lastModifiedDate = '2019-04-17 8:59:59.000'}
 
-Pessimistic locking allows transactions to obtain exclusive locks to a database, therefore this locking strategy is managed by the database. It is important to consider the different behaviours between database servers as the results can vary due to different locking implementations.
+Pessimistic locking allows transactions to obtain exclusive locks to a database, therefore, this locking strategy is managed by the database. It is important to consider the different behaviours between database servers as the results can vary due to different locking implementations.
 LockModeTypes:
 - READ, OPTIMISTIC: the version is checked
 - WRITE, OPTIMISTIC_FORCE_INCREMENT: entity version is incremented even if it's not changed

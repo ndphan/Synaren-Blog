@@ -1,0 +1,101 @@
+@formatter:type#header{Spring Data JPA}
+Spring Data JPA is a database access library that uses interfaces to define database queries. Spring provides the implementation of the interfaces by converting the method name to an SQL query.
+
+It supports CRUD, sorting, and pagination out of the box and as each query can be defined as an interface or custom implementation, this reduces the boilerplate code required to execute queries.
+
+@formatter:type#highlight{Setup}
+Add Spring Data JPA dependency to pom.xml with the specific version for Maven.
+@formatter:type#xml{<dependency>
+	<groupId>org.springframework.data</groupId>
+	<artifactId>spring-data-jpa</artifactId>
+	<version>{Version}</version>
+</dependency>
+}
+
+@formatter:type#highlight{Configuration}
+Here we define three beans (all three are required):
+1. DataSource 
+- The configuration of the database to connect to.
+2. LocalContainerEntityManagerFactoryBean 
+- The Entity manager used to maintain the database connection.
+3. JpaTransactionManager
+- The transaction manager adds support for @Transactional annotations.
+
+There are two conventions to creating a datasource.
+1. setting the username, password etc. manually. 
+2. using a property file with the database settings.
+@formatter:type#properties{database1.datasource.url=
+database1.datasource.username=
+database1.datasource.password=
+database1.datasource.database-name=
+database1.datasource.driver-class-name=
+}
+
+@formatter:type#java{@Configuration
+@EnableTransactionManagement
+@EnableJpaRepositories
+public class DatabaseConfiguration {
+	@Bean
+	@ConfigurationProperties("database1.datasource")
+	public DataSource dataSource() {
+		return DataSourceBuilder.create().build();
+	}
+	@Bean
+	public DataSource dataSource() {
+		DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
+		dataSourceBuilder.driverClassName(/*value*/);
+		dataSourceBuilder.url(/*value*/);
+		dataSourceBuilder.username(/*value*/);
+		dataSourceBuilder.password(/*value*/);
+		return dataSourceBuilder.build(/*value*/);
+	}
+	@Bean
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder builder) {
+		LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+		em.setDataSource(dataSource());
+		em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+		em.setPackagesToScan(/*package*/);
+		return em;
+	}
+	@Bean
+	public JpaTransactionManager transactionManager() {
+		return new JpaTransactionManager(entityManagerFactory().getObject());
+	}
+}
+}
+
+@formatter:type#highlight{Example}
+@formatter:type#java{@Entity
+@Table(name = "EntityTable")
+public class Entity {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
+	private long id;
+	@Column(name = "name")
+	private String name;
+	....
+}
+}
+
+@formatter:type#java{@Repository
+public interface EntityRepository extends Repository<Entity, Long> {
+	Entity findByName(String name);
+}
+}
+
+@formatter:type#java{@Service
+public class EntityService {
+	private EntityRepository entityRepo;
+	public EntityService(@autowired EntityRepository entityRepo){
+		this.entityRepo = entityRepo;
+	}
+	@Transactional(readOnly = true)
+	public Entity findByName(String name){
+		return entityRepo.findByName(name);
+	}
+}
+}
+
+@formatter:type#highlight{Conclusion}
+This shows how to setup Spring Data JPA for Spring Boot applications. Spring Data JPA has become the standard way to interact with the database as it reduces the amount of boilerplate code required to execute database queries. With @transactional (exceptions are automatically rolled back) and query mapping to @entity classes (reduces the need to map columns to data models), Spring Data JPA has its advantages over traditionally native SQL queries.
