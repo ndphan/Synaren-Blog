@@ -35,7 +35,7 @@ function buildResponse(code, message) {
 
 exports.handler = async _ => {
   const params = {
-    Bucket: "synaren-app.com",
+    Bucket: "blog.synaren-app.com",
     Prefix: 'blog'
   };
   return await s3

@@ -133,8 +133,8 @@ Resources:
               - s3:Get*
               - s3:List*
               Resource: 
-              - "arn:aws:s3:::synaren-app.com"
-              - "arn:aws:s3:::synaren-app.com/*"
+              - "arn:aws:s3:::blog.synaren-app.com"
+              - "arn:aws:s3:::blog.synaren-app.com/*"
       RoleName: 'SynarenBlogServiceRole'
 # -- IAM Service Role
 # -- SynarenBlogListArticlesFunction

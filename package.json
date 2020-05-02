@@ -2,7 +2,7 @@
   "name": "synaren-blog",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://www.synaren-blog.com/",
+  "homepage": "https://blog.synaren-app.com/",
   "dependencies": {
     "moment": "^2.24.0",
     "react": "^16.8.6",

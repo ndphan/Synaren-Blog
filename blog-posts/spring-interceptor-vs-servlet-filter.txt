@@ -97,7 +97,7 @@ The proxy will call a Spring-managed filter with the same bean name which implem
 	}
 }}
 
-@formatter:type#image{https://synaren-app.com/images/spring-filter-interceptor-flow.png}
+@formatter:type#image{https://blog.synaren-app.com/images/spring-filter-interceptor-flow.png}
 
 @formatter:type#subheader{Conclusion}
 The Servlet filter and Spring interceptor allow applications to decouple common logic from the application logic.
