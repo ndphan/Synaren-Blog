@@ -151,7 +151,7 @@ Resources:
     Properties:
       Code: '../code/SynarenBlogListArticlesFunction.js'
       Description: 'Get all blog articles'
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Timeout: 180
       MemorySize: 128
       FunctionName: 'SynarenBlogListArticles'
